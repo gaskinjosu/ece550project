@@ -1,3 +1,5 @@
+
+%Global variables
 delta = (1/20);
 RC = 1;
 
@@ -12,8 +14,7 @@ RC = 1;
 %are considering k between 0 and 400 (i.e we are samping 20 times per
 %second) -- (use delta*k = t to convert)
 
-
-%N=1:
+%%%%%%%%%%%%% N=1 %%%%%%%%%%%%
 A = (1/RC)*[-1];
 B = (1/RC)*[1];
 C = [1];
@@ -30,24 +31,15 @@ D_prime = D;
 %equal to...integral(0 to t) of e^-t = 1 - e^-t
 %Additionally, y[k] = C_prime*x[k] = x[k] and y(t) = C*x(t) = x(t)
 
-%Note: matlab is not zero-indexed, so the first element must be index 1
-%Creating arrays that hold all 400 points for the discrete case
-x_zero_state_discrete_1(1) = 0;
-for k = 1:1:400
-    x_zero_state_discrete_1(k+1) = A_prime*x_zero_state_discrete_1(k) + B_prime*1;
-    y_zero_state_discrete_1(k) = C_prime*x_zero_state_discrete_1(k) + D_prime*1;
-end
-y_zero_state_discrete_1(401) = C_prime*x_zero_state_discrete_1(401) + D_prime*1;
+%Setting up the time axis for the discrete case 
+%(so the points will be plotted as going from 0 to 20 instead of based on array indices)
+x = 0:delta:20;
+[x_zero_state_discrete_1,y_zero_state_discrete_1] = zeroState(A_prime,B_prime,C_prime,D_prime,1);
 
 %Creating the continuous time equivalents
 t = 0:0.01:20;
 x_zero_state_continuous_1 = 1 - exp(-t);
 y_zero_state_continuous_1 = 1 - exp(-t);
-
-%Setting up the time axis for the discrete case 
-%(so the points will be plotted as going from 0 to 20 instead of based on
-%array indices)
-x = 0:delta:20;
 
 %Plotting the discrete and continuous x on the same axes
 figure()
@@ -61,6 +53,7 @@ plot(x,y_zero_state_discrete_1,'linestyle','none','marker','o');
 hold on;
 plot(t,y_zero_state_continuous_1);
 
+
 %ZERO INPUT: If we consider zero-input response (with x(0) = 1) then we
 %will obtain x[k+1] = A_prime * x[k] => x[1] = A_prime, X[2] = A_prime^2,
 %etc...which is repeated multiplication of A_prime = 1+ -1(1/20) = 19/20.
@@ -71,19 +64,13 @@ plot(t,y_zero_state_continuous_1);
 %only a single capacitor so it is both the state and the observation)
 %and y(t) = C*x(t) = x(t) 
 
-x_zero_input_discrete_1(1) = 1;
-for k = 1:1:400
-    x_zero_input_discrete_1(k+1) = A_prime*x_zero_input_discrete_1(k);
-    y_zero_input_discrete_1(k) = C_prime*x_zero_input_discrete_1(k);
-end
-y_zero_input_discrete_1(401) = C_prime*x_zero_input_discrete_1(401);
+x = 0:delta:20;
+[x_zero_input_discrete_1,y_zero_input_discrete_1] = zeroInput(A_prime,B_prime,C_prime,D_prime,1);
 
 t = 0:0.001:20;
 x_zero_input_continuous_1 = exp(-t);
 y_zero_input_continuous_1 = exp(-t);
 
-
-x = 0:delta:20;
 figure()
 plot(x,x_zero_input_discrete_1,'linestyle','none','marker','o');
 hold on;
@@ -95,9 +82,7 @@ hold on;
 plot(t,y_zero_input_continuous_1);
 
 
-
-
-%N=2:
+%%%%%%%%%%%%%% N=2 %%%%%%%%%%%%%%%
 A = (1/RC)*[-1 1;1 -2];
 B = (1/RC)*[0 1];
 C = [1 0];
@@ -109,31 +94,47 @@ C_prime = C;
 D_prime = D;
 
 %ZERO STATE:
-%Note: matlab is not zero-indexed, so the first element must be index 1
-x_zero_state_discrete_2(:,1) = [0 0];
-for k = 1:1:400
-    x_zero_state_discrete_2(:,k+1) = A_prime*x_zero_state_discrete_2(:,k) + (B_prime*1).';
-    y_zero_state_discrete_2(:,k) = C_prime*x_zero_state_discrete_2(:,k) + D_prime*1;
-end
-y_zero_state_discrete_2(401) = C_prime*x_zero_state_discrete_2(:,401) + D_prime*1;
+x = 0:delta:20;
+[x_zero_state_discrete_2,y_zero_state_discrete_2] = zeroState(A_prime,B_prime,C_prime,D_prime,2);
 
 t = 0:0.01:20;
-%NEED TO SOLVE ANALYITCALLY AND FILL THIS IN
-%x_zero_state_continuous_1 = B*t;
-%y_zero_state_continuous_1 = 0*t ;
+%TODO: SOLVE ANALYITCALLY AND FILL THIS IN???
+%x_zero_state_continuous_2 = ;
+%y_zero_state_continuous_2 = ;
 
+figure()
+plot(x,x_zero_state_discrete_2,'linestyle','none','marker','o');
+%hold on;
+%plot(t,x_zero_state_continuous_2);
+
+figure()
+plot(x,y_zero_state_discrete_2,'linestyle','none','marker','o');
+%hold on;
+%plot(t,y_zero_state_continuous_2);
+
+
+%ZERO INPUT:
 x = 0:delta:20;
-figure()
-plot(x,x_zero_state_discrete_2,'-x');
-%hold on;
-%plot(t,x_zero_state_continuous_1);
+[x_zero_input_discrete_2,y_zero_input_discrete_2] = zeroInput(A_prime,B_prime,C_prime,D_prime,2);
+
+t = 0:0.01:20;
+%TODO: SOLVE ANALYITCALLY AND FILL THIS IN???
+%x_zero_input_continuous_2 = ;
+%y_zero_input_continuous_2 = ;
 
 figure()
-plot(x,y_zero_state_discrete_2,'-x');
+plot(x,x_zero_input_discrete_2,'linestyle','none','marker','o');
 %hold on;
-%plot(t,y_zero_state_continuous_1);
+%plot(t,x_zero_input_continuous_2);
+
+figure()
+plot(x,y_zero_input_discrete_2,'linestyle','none','marker','o');
+%hold on;
+%plot(t,y_zero_input_continuous_2);
 
 
+
+%2(b)
 %N=20:
 A = (1/RC)*[-1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0;
            1 -2 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0;
@@ -166,13 +167,7 @@ C_prime = C;
 D_prime = D;
 
 %ZERO STATE:
-%Note: matlab is not zero-indexed, so the first element must be index 1
-x_zero_state_discrete_20(:,1) = [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0];
-for k = 1:1:400
-    x_zero_state_discrete_20(:,k+1) = A_prime*x_zero_state_discrete_20(:,k) + (B_prime*1).';
-    y_zero_state_discrete_20(:,k) = C_prime*x_zero_state_discrete_20(:,k) + D_prime*1;
-end
-y_zero_state_discrete_20(401) = C_prime*x_zero_state_discrete_20(:,401) + D_prime*1;
+[x_zero_state_discrete_20,y_zero_state_discrete_20] = zeroState(A_prime,B_prime,C_prime,D_prime,20);
 
 figure()
 plot(x,x_zero_state_discrete_20);
@@ -180,4 +175,35 @@ plot(x,x_zero_state_discrete_20);
 figure()
 plot(x,y_zero_state_discrete_20);
 
+%ZERO INPUT:
+[x_zero_input_discrete_20,y_zero_input_discrete_20] = zeroInput(A_prime,B_prime,C_prime,D_prime,20);
+
+figure()
+plot(x,x_zero_input_discrete_20);
+
+figure()
+plot(x,y_zero_input_discrete_20);
+
+
+
+function [x,y] = zeroState(A_prime,B_prime,C_prime,D_prime,n)
+    x(:,1) = zeros(1,n);
+    %Note: matlab is not zero-indexed, so the first element must be index 1
+    for k = 1:1:400
+        x(:,k+1) = A_prime*x(:,k) + (B_prime*1).';
+        y(:,k) = C_prime*x(:,k) + D_prime*1;
+    end
+    y(401) = C_prime*x(:,401) + D_prime*1;
+end
+
+function [x,y] = zeroInput(A_prime,B_prime,C_prime,D_prime,n)
+    x(:,1) = zeros(1,n);
+    x(1,1) = 1;
+    %Note: matlab is not zero-indexed, so the first element must be index 1
+    for k = 1:1:400
+        x(:,k+1) = A_prime*x(:,k);
+        y(:,k) = C_prime*x(:,k);
+    end
+    y(401) = C_prime*x(:,401);
+end
 
