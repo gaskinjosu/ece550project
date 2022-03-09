@@ -3,6 +3,9 @@
 delta = (1/20);
 RC = 1;
 
+set(groot,'defaultLineMarkerSize',10);
+set(groot,'defaultLineLineWidth',1.5);
+
 %2(a) - Verify the approximation by comparing the state vector x(t) and the
 %output y(t) (for t0 = 0 <= t <= 20[sec]) to their theoretical values in the 
 %case of n = 1 and n = 2 (i.e., 1 ×1 and 2 ×2 state matrix).
@@ -43,13 +46,13 @@ y_zero_state_continuous_1 = 1 - exp(-t);
 
 %Plotting the discrete and continuous x on the same axes
 figure()
-plot(x,x_zero_state_discrete_1,'linestyle','none','marker','o');
+plot(x,x_zero_state_discrete_1,'linestyle','none','marker','.');
 hold on;
 plot(t,x_zero_state_continuous_1);
 
 %Plotting the discrete and continuous y on the same axes
 figure()
-plot(x,y_zero_state_discrete_1,'linestyle','none','marker','o');
+plot(x,y_zero_state_discrete_1,'linestyle','none','marker','.');
 hold on;
 plot(t,y_zero_state_continuous_1);
 
@@ -72,12 +75,12 @@ x_zero_input_continuous_1 = exp(-t);
 y_zero_input_continuous_1 = exp(-t);
 
 figure()
-plot(x,x_zero_input_discrete_1,'linestyle','none','marker','o');
+plot(x,x_zero_input_discrete_1,'linestyle','none','marker','.');
 hold on;
 plot(t,x_zero_input_continuous_1);
 
 figure()
-plot(x,y_zero_input_discrete_1,'linestyle','none','marker','o');
+plot(x,y_zero_input_discrete_1,'linestyle','none','marker','.');
 hold on;
 plot(t,y_zero_input_continuous_1);
 
@@ -98,19 +101,43 @@ x = 0:delta:20;
 [x_zero_state_discrete_2,y_zero_state_discrete_2] = zeroState(A_prime,B_prime,C_prime,D_prime,2);
 
 t = 0:0.01:20;
-%TODO: SOLVE ANALYITCALLY AND FILL THIS IN???
-%x_zero_state_continuous_2 = ;
-%y_zero_state_continuous_2 = ;
+%CONTINUOUS TIME EQUIVALENTS:
+%This can be solved for by consdering x(t) = integral(0 to t) of (Phi*B*U)
+%(since the initial state is zero). Since input is a step function, U can
+%be set = 1. So, only the transition matrix need to be determined.
+
+%Doing an eigendecomposition of A allows us to express it using:
+U_2 = [(1+sqrt(5))/2 (1-sqrt(5))/2; 1 1];
+Lambda_2 = [(sqrt(5)-3)/2 0; 0 (-sqrt(5)-3)/2];
+%A = U_2*Lambda_2*inv(U_2)
+
+%Defining symbolic variables to be used in matrix multiplication
+syms t_sym
+syms sigma_sym
+
+%Now, the transition matrix can be expressed as Phi = U*e^(lambda*t)*U_inv
+%Defining the matrix that is e^(lambda*(t-sigma))
+e_lambda_t_sigma = [exp((sqrt(5)-3)*(t_sym - sigma_sym)/2) 0; 0 exp((-sqrt(5)-3)*(t_sym - sigma_sym)/2)];
+%Defining Phi(t,sigma)
+phi_t_sigma = U_2*e_lambda_t_sigma*inv(U_2);
+
+%Now, finding the integrand for the zero state response:
+integrand = phi_t_sigma*(B.');
+
+%Integrating to get the continuous time zero state resposne:
+x_zero_state_continuous_2 = int(integrand,sigma_sym,0,t_sym);
+y_zero_state_continuous_2 = (C)*x_zero_state_continuous_2;
 
 figure()
-plot(x,x_zero_state_discrete_2,'linestyle','none','marker','o');
-%hold on;
-%plot(t,x_zero_state_continuous_2);
+plot(x,x_zero_state_discrete_2,'linestyle','none','marker','.');
+hold on;
+%Using fplot instead of plot here due to symbolic variables being used
+fplot(x_zero_state_continuous_2,[0 20]);
 
 figure()
-plot(x,y_zero_state_discrete_2,'linestyle','none','marker','o');
-%hold on;
-%plot(t,y_zero_state_continuous_2);
+plot(x,y_zero_state_discrete_2,'linestyle','none','marker','.');
+hold on;
+fplot(y_zero_state_continuous_2,[0 20]);
 
 
 %ZERO INPUT:
@@ -118,19 +145,27 @@ x = 0:delta:20;
 [x_zero_input_discrete_2,y_zero_input_discrete_2] = zeroInput(A_prime,B_prime,C_prime,D_prime,2);
 
 t = 0:0.01:20;
-%TODO: SOLVE ANALYITCALLY AND FILL THIS IN???
-%x_zero_input_continuous_2 = ;
-%y_zero_input_continuous_2 = ;
+%CONTINUOUS TIME EQUIVALENTS:
+
+%We can simply re-use the transition matrix found for the zero-state
+%response here, expect now it will be a function of t and t_0 = 0.
+e_lambda_t = [exp((sqrt(5)-3)*(t_sym)/2) 0; 0 exp((-sqrt(5)-3)*(t_sym)/2)];
+phi_t = U_2*e_lambda_t*inv(U_2);
+
+%Now, the zero-input response is simply the initial state multiplied by
+%this transition matrix
+x_zero_input_continuous_2 = phi_t*([1 0].') ;
+y_zero_input_continuous_2 = (C)*x_zero_input_continuous_2;
 
 figure()
-plot(x,x_zero_input_discrete_2,'linestyle','none','marker','o');
-%hold on;
-%plot(t,x_zero_input_continuous_2);
+plot(x,x_zero_input_discrete_2,'linestyle','none','marker','.');
+hold on;
+fplot(x_zero_input_continuous_2,[0 20]);
 
 figure()
-plot(x,y_zero_input_discrete_2,'linestyle','none','marker','o');
-%hold on;
-%plot(t,y_zero_input_continuous_2);
+plot(x,y_zero_input_discrete_2,'linestyle','none','marker','.');
+hold on;
+fplot(y_zero_input_continuous_2,[0 20]);
 
 
 
