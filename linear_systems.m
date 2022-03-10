@@ -223,6 +223,28 @@ figure()
 plot(x,y_zero_input_discrete_20);
 
 
+%4(a):
+
+%Is the system uniformly stable (US) ?
+%Because we have an LTI system, we can simply check if all of the
+%eigenvalues of A are <= 0 to determine US
+%NOTE: could also inspect the magnitude of the eigenvalues of A_prime
+%(discrete version) instead...(magnitude will be less than 1)
+eig(A)
+%TRUE (inspect output) => system is US!
+
+%Is the system uniformly exponentially stable (UES) ?
+%Because we have an LTI system, we can simply check if all of the
+%eigenvalues of A are < 0 to determine UES
+eig(A)
+%TRUE (inspect output) => system is UES!
+
+%Is the system uniformly asymptotically stable (UAS) ?
+%There is a theorem that states that a system is UAS if and only if the
+%system is UES:
+%Since the system is indeed UES => system is UAS!
+
+
 %4(b): The Lyapunov stability criteria with Q = identity is as follows:
 % US : A^T + A <= 0, which means -A^T - A >= 0 (-A^T - A is PSD)
 % UES: A^T + A <= -vI which means -vI - A^T - A >= 0 (-vI - A^T - A is PSD)
@@ -231,18 +253,20 @@ plot(x,y_zero_input_discrete_20);
 US_lyapunov = (-1*(A.')) + (-1*A);
 %printing out eigenvalues, we can see they are all >= 0
 eig(US_lyapunov)
+%TRUE (inspect output) => system is US by Lyapunov condition!
 
 %Calculating UES lyapunov condition
 %(setting v=0.01 achieves all eigenvalues >= 0)
 UES_lyapunov = (-0.01*eye(20)) + (-1*(A.')) + (-1*A);
 %printing out eigenvalues, we can see they are all >= 0
 eig(UES_lyapunov)
+%TRUE (inspect output) => system is UES by Lyapunov condition!
 
 
 %4(c): for BIBO stability, we can use the argument that if the norm of C
 %and the norm of B are bounded (which they obviously are in our case), then
 %if the system is UES it is also BIBO stable.
-%=> since the system is UES (by Lyapunov UES condition), then the system is
+%=> since the system is UES (by Lyapunov UES condition and eigenvalues of A), then the system is
 %also BIBO stable
 
 
