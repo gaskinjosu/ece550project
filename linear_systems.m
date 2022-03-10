@@ -220,6 +220,70 @@ figure()
 plot(x,y_zero_input_discrete_20);
 
 
+%4(b): The Lyapunov stability criteria with Q = identity is as follows:
+% US : A^T + A <= 0, which means -A^T - A >= 0 (-A^T - A is PSD)
+% UES: A^T + A <= -vI which means -vI - A^T - A >= 0 (-vI - A^T - A is PSD)
+
+%Calculating US lyapunov condition
+US_lyapunov = (-1*(A.')) + (-1*A);
+%printing out eigenvalues, we can see they are all >= 0
+eig(US_lyapunov)
+
+%Calculating UES lyapunov condition
+%(setting v=0.01 achieves all eigenvalues >= 0)
+UES_lyapunov = (-0.01*eye(20)) + (-1*(A.')) + (-1*A);
+%printing out eigenvalues, we can see they are all >= 0
+eig(UES_lyapunov)
+
+
+%4(c): for BIBO stability, we can use the argument that if the norm of C
+%and the norm of B are bounded (which they obviously are in our case), then
+%if the system is UES it is also BIBO stable.
+%=> since the system is UES (by Lyapunov UES condition), then the system is
+%also BIBO stable
+
+
+%TODO: for #5 and #6, need to determine if we should be using the discrete
+%A_prime, B_prime, C_prime, or the continuous A,B,C for calculation (it does not seem to make
+%a difference). Additionally, need to determine if setting the tolerance in
+%the rank() function so low is not providing a misleading result (because
+%if the tolerance is raised, rank() reports less than rank n)
+
+%5: For n=20, is the system controllable on [0, 20]
+%Since the system is LTI, we can compute the controllability matrix
+%and ensure that it is rank n to determine if the system is controllable
+%Constructing the controllability matrix
+current_col = (B.');
+controllability_matrix = [current_col];
+for i = 2:1:20
+    current_col = A*current_col;
+    controllability_matrix = [controllability_matrix current_col];
+end
+%Printing out the rank of the controllability matrix
+%note: had to set tolerance to be 1e-8 or smaller to get
+%result that controllability matrix is full rank
+controllability_rank = rank(controllability_matrix,1e-50);
+disp('Controllability Matrix Rank:')
+disp(controllability_rank)
+
+%6: For n=20, is the system observable on [0, 20]
+%Since the system is LTI, we can compute the observability matrix
+%and ensure that it is rank n to determine if the system is observable
+%Constructing the observability matrix
+current_row = C;
+observability_matrix = [current_row];
+for i=2:1:20
+    current_row = current_row*A;
+    observability_matrix = [observability_matrix ; current_row];
+end
+%Printing out the rank of the controllability matrix
+%note: had to set tolerance to be 1e-8 or smaller to get
+%result that controllability matrix is full rank
+observability_rank = rank(observability_matrix,1e-30);
+disp('Observability Matrix Rank:')
+disp(observability_rank)
+
+
 
 function [x,y] = zeroState(A_prime,B_prime,C_prime,D_prime,n)
     x(:,1) = zeros(1,n);
