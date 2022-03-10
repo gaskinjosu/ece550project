@@ -1,6 +1,9 @@
 
 %Global variables
+%NOTE: must set delta separately in zeroState and zeroInput functions as
+%well
 delta = (1/20);
+max_samples = 20/delta;
 RC = 1;
 
 set(groot,'defaultLineMarkerSize',10);
@@ -286,23 +289,27 @@ disp(observability_rank)
 
 
 function [x,y] = zeroState(A_prime,B_prime,C_prime,D_prime,n)
+    delta = (1/20);
+    max_samples = 20/delta;
     x(:,1) = zeros(1,n);
     %Note: matlab is not zero-indexed, so the first element must be index 1
-    for k = 1:1:400
+    for k = 1:1:max_samples
         x(:,k+1) = A_prime*x(:,k) + (B_prime*1).';
         y(:,k) = C_prime*x(:,k) + D_prime*1;
     end
-    y(401) = C_prime*x(:,401) + D_prime*1;
+    y((20/delta)+1) = C_prime*x(:,(20/delta)+1) + D_prime*1;
 end
 
 function [x,y] = zeroInput(A_prime,B_prime,C_prime,D_prime,n)
+    delta = (1/20);
+    max_samples = 20/delta;
     x(:,1) = zeros(1,n);
     x(1,1) = 1;
     %Note: matlab is not zero-indexed, so the first element must be index 1
-    for k = 1:1:400
+    for k = 1:1:max_samples
         x(:,k+1) = A_prime*x(:,k);
         y(:,k) = C_prime*x(:,k);
     end
-    y(401) = C_prime*x(:,401);
+    y((20/delta)+1) = C_prime*x(:,(20/delta)+1);
 end
 
