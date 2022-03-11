@@ -238,13 +238,9 @@ hold on
 fplot(x_zero_input_continuous_20, [0 20]);
 
 figure()
-<<<<<<< HEAD
 plot(x,y_zero_input_discrete_20, 'linestyle','none','marker','.');
 hold on
 fplot(y_zero_input_continuous_20, [0 20]);
-=======
-plot(x,y_zero_input_discrete_20);
-
 
 %4(a):
 
@@ -334,8 +330,6 @@ disp('Observability Matrix Rank:')
 disp(observability_rank)
 
 
->>>>>>> 6b46e54c8f42d698dae5c28f026812c3ba9bc045
-
 function [x,y] = zeroState(A_prime,B_prime,C_prime,D_prime,n)
     delta = (1/20);
     max_samples = 20/delta;
@@ -345,7 +339,6 @@ function [x,y] = zeroState(A_prime,B_prime,C_prime,D_prime,n)
         x(:,k+1) = A_prime*x(:,k) + (B_prime*1).';
         y(:,k) = C_prime*x(:,k) + D_prime*1;
     end
-    y(401) = C_prime*x(:,401) + D_prime*1;
     y((20/delta)+1) = C_prime*x(:,(20/delta)+1) + D_prime*1;
 end
 
@@ -355,13 +348,15 @@ function [x,y] = zeroInput(A_prime,B_prime,C_prime,D_prime,n)
     x(:,1) = zeros(1,n);
     x(1,1) = 1;
     %Note: matlab is not zero-indexed, so the first element must be index 1
+    for k = 1:1:max_samples
         x(:,k+1) = A_prime*x(:,k);
         y(:,k) = C_prime*x(:,k);
     end
+    y((20/delta)+1) = C_prime*x(:,(20/delta)+1);
 end
 
 % we find the eigen-decomposition here, although Matlab is capable of doing
-% the computation directly
+% the computation directly, related to Q3
 function [state_t] = stateTransitionM(A, t, t_0)
     [Q, D] = eig(A);
     state_t_temp = expm(D.*(t-t_0));
