@@ -203,25 +203,44 @@ A_prime = eye(20) + A*delta;
 B_prime = B*delta;
 C_prime = C;
 D_prime = D;
+x_0 = zeros(1, 20);
+x_0(1) = 1;
+
+% continuous time case for n = 20, integration done similarly to previous
+% cases for n
+phi_t_20 = stateTransitionM(A, t_sym, sigma_sym);
+x_zero_state_continuous_20 = int(phi_t_20*(B.'), sigma_sym, 0, t_sym);
+y_zero_state_continuous_20 = C*x_zero_state_continuous_20;
+
+phi_t_20 = stateTransitionM(A, t_sym, 0);
+x_zero_input_continuous_20 = phi_t_20*(x_0.');
+y_zero_input_continuous_20 = C*x_zero_input_continuous_20;
 
 %ZERO STATE:
 [x_zero_state_discrete_20,y_zero_state_discrete_20] = zeroState(A_prime,B_prime,C_prime,D_prime,20);
 
 figure()
-plot(x,x_zero_state_discrete_20);
+plot(x,x_zero_state_discrete_20, 'linestyle','none','marker','.');
+hold on
+fplot(x_zero_state_continuous_20, [0 20]);
 
 figure()
-plot(x,y_zero_state_discrete_20);
+plot(x,y_zero_state_discrete_20, 'linestyle','none','marker','.');
+hold on
+fplot(y_zero_state_continuous_20, [0 20]);
 
 %ZERO INPUT:
 [x_zero_input_discrete_20,y_zero_input_discrete_20] = zeroInput(A_prime,B_prime,C_prime,D_prime,20);
 
 figure()
-plot(x,x_zero_input_discrete_20);
+plot(x,x_zero_input_discrete_20, 'linestyle','none','marker','.');
+hold on
+fplot(x_zero_input_continuous_20, [0 20]);
 
 figure()
-plot(x,y_zero_input_discrete_20);
-
+plot(x,y_zero_input_discrete_20, 'linestyle','none','marker','.');
+hold on
+fplot(y_zero_input_continuous_20, [0 20]);
 
 %4(a):
 
@@ -311,7 +330,6 @@ disp('Observability Matrix Rank:')
 disp(observability_rank)
 
 
-
 function [x,y] = zeroState(A_prime,B_prime,C_prime,D_prime,n)
     delta = (1/20);
     max_samples = 20/delta;
@@ -335,5 +353,13 @@ function [x,y] = zeroInput(A_prime,B_prime,C_prime,D_prime,n)
         y(:,k) = C_prime*x(:,k);
     end
     y((20/delta)+1) = C_prime*x(:,(20/delta)+1);
+end
+
+% we find the eigen-decomposition here, although Matlab is capable of doing
+% the computation directly, related to Q3
+function [state_t] = stateTransitionM(A, t, t_0)
+    [Q, D] = eig(A);
+    state_t_temp = expm(D.*(t-t_0));
+    state_t = Q*state_t_temp*inv(Q);
 end
 
