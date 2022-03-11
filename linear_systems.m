@@ -1,6 +1,9 @@
 
 %Global variables
+%NOTE: must set delta separately in zeroState and zeroInput functions as
+%well
 delta = (1/20);
+max_samples = 20/delta;
 RC = 1;
 
 set(groot,'defaultLineMarkerSize',10);
@@ -235,29 +238,126 @@ hold on
 fplot(x_zero_input_continuous_20, [0 20]);
 
 figure()
+<<<<<<< HEAD
 plot(x,y_zero_input_discrete_20, 'linestyle','none','marker','.');
 hold on
 fplot(y_zero_input_continuous_20, [0 20]);
+=======
+plot(x,y_zero_input_discrete_20);
+
+
+%4(a):
+
+%Is the system uniformly stable (US) ?
+%Because we have an LTI system, we can simply check if all of the
+%eigenvalues of A are <= 0 to determine US
+%NOTE: could also inspect the magnitude of the eigenvalues of A_prime
+%(discrete version) instead...(magnitude will be less than 1)
+eig(A)
+%TRUE (inspect output) => system is US!
+
+%Is the system uniformly exponentially stable (UES) ?
+%Because we have an LTI system, we can simply check if all of the
+%eigenvalues of A are < 0 to determine UES
+eig(A)
+%TRUE (inspect output) => system is UES!
+
+%Is the system uniformly asymptotically stable (UAS) ?
+%There is a theorem that states that a system is UAS if and only if the
+%system is UES:
+%Since the system is indeed UES => system is UAS!
+
+
+%4(b): The Lyapunov stability criteria with Q = identity is as follows:
+% US : A^T + A <= 0, which means -A^T - A >= 0 (-A^T - A is PSD)
+% UES: A^T + A <= -vI which means -vI - A^T - A >= 0 (-vI - A^T - A is PSD)
+
+%Calculating US lyapunov condition
+US_lyapunov = (-1*(A.')) + (-1*A);
+%printing out eigenvalues, we can see they are all >= 0
+eig(US_lyapunov)
+%TRUE (inspect output) => system is US by Lyapunov condition!
+
+%Calculating UES lyapunov condition
+%(setting v=0.01 achieves all eigenvalues >= 0)
+UES_lyapunov = (-0.01*eye(20)) + (-1*(A.')) + (-1*A);
+%printing out eigenvalues, we can see they are all >= 0
+eig(UES_lyapunov)
+%TRUE (inspect output) => system is UES by Lyapunov condition!
+
+
+%4(c): for BIBO stability, we can use the argument that if the norm of C
+%and the norm of B are bounded (which they obviously are in our case), then
+%if the system is UES it is also BIBO stable.
+%=> since the system is UES (by Lyapunov UES condition and eigenvalues of A), then the system is
+%also BIBO stable
+
+
+%TODO: for #5 and #6, need to determine if we should be using the discrete
+%A_prime, B_prime, C_prime, or the continuous A,B,C for calculation (it does not seem to make
+%a difference). Additionally, need to determine if setting the tolerance in
+%the rank() function so low is not providing a misleading result (because
+%if the tolerance is raised, rank() reports less than rank n)
+
+%5: For n=20, is the system controllable on [0, 20]
+%Since the system is LTI, we can compute the controllability matrix
+%and ensure that it is rank n to determine if the system is controllable
+%Constructing the controllability matrix
+current_col = (B.');
+controllability_matrix = [current_col];
+for i = 2:1:20
+    current_col = A*current_col;
+    controllability_matrix = [controllability_matrix current_col];
+end
+%Printing out the rank of the controllability matrix
+%note: had to set tolerance to be 1e-8 or smaller to get
+%result that controllability matrix is full rank
+controllability_rank = rank(controllability_matrix,1e-50);
+disp('Controllability Matrix Rank:')
+disp(controllability_rank)
+
+%6: For n=20, is the system observable on [0, 20]
+%Since the system is LTI, we can compute the observability matrix
+%and ensure that it is rank n to determine if the system is observable
+%Constructing the observability matrix
+current_row = C;
+observability_matrix = [current_row];
+for i=2:1:20
+    current_row = current_row*A;
+    observability_matrix = [observability_matrix ; current_row];
+end
+%Printing out the rank of the controllability matrix
+%note: had to set tolerance to be 1e-8 or smaller to get
+%result that controllability matrix is full rank
+observability_rank = rank(observability_matrix,1e-30);
+disp('Observability Matrix Rank:')
+disp(observability_rank)
+
+
+>>>>>>> 6b46e54c8f42d698dae5c28f026812c3ba9bc045
 
 function [x,y] = zeroState(A_prime,B_prime,C_prime,D_prime,n)
+    delta = (1/20);
+    max_samples = 20/delta;
     x(:,1) = zeros(1,n);
     %Note: matlab is not zero-indexed, so the first element must be index 1
-    for k = 1:1:400
+    for k = 1:1:max_samples
         x(:,k+1) = A_prime*x(:,k) + (B_prime*1).';
         y(:,k) = C_prime*x(:,k) + D_prime*1;
     end
     y(401) = C_prime*x(:,401) + D_prime*1;
+    y((20/delta)+1) = C_prime*x(:,(20/delta)+1) + D_prime*1;
 end
 
 function [x,y] = zeroInput(A_prime,B_prime,C_prime,D_prime,n)
+    delta = (1/20);
+    max_samples = 20/delta;
     x(:,1) = zeros(1,n);
     x(1,1) = 1;
     %Note: matlab is not zero-indexed, so the first element must be index 1
-    for k = 1:1:400
         x(:,k+1) = A_prime*x(:,k);
         y(:,k) = C_prime*x(:,k);
     end
-    y(401) = C_prime*x(:,401);
 end
 
 % we find the eigen-decomposition here, although Matlab is capable of doing
