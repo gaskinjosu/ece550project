@@ -200,8 +200,8 @@ A_prime = eye(20) + A*delta;
 B_prime = B*delta;
 C_prime = C;
 D_prime = D;
-x_0 = zeros(1, 20);
-x_0(1) = 1;
+x_0 = zeros(20);
+x_0(20) = 1;
 
 % continuous time case for n = 20, integration done similarly to previous
 % cases for n
@@ -209,8 +209,7 @@ phi_t_20 = stateTransitionM(A, t_sym, sigma_sym);
 x_zero_state_continuous_20 = int(phi_t_20*(B.'), sigma_sym, 0, t_sym);
 y_zero_state_continuous_20 = C*x_zero_state_continuous_20;
 
-phi_t_20 = stateTransitionM(A, t_sym, 0);
-x_zero_input_continuous_20 = phi_t_20*(x_0.');
+x_zero_input_continuous_20 = phi_t_20*x_0;
 y_zero_input_continuous_20 = C*x_zero_input_continuous_20;
 
 %ZERO STATE:
